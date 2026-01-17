@@ -39,7 +39,7 @@ end
 
 module O = struct
   type 'a t =
-    { counter : 'a With_valid.t [@bits num_bits]
+    { counter : 'a With_valid.t [@bits ( 2 * num_bits)]
     ; invalid_id : 'a }
   [@@deriving hardcaml]
 end
@@ -63,7 +63,7 @@ let create scope ({ clock; clear; start; finish; data_in; data_in_valid } : _ I.
 
   let _ = scope in
   
-  let counter = Variable.reg spec ~width:num_bits in
+  let counter = Variable.reg spec ~width:(2 * num_bits) in
   let counter_valid = Variable.wire ~default:gnd () in
   let invalid_id = Variable.wire ~default:gnd () in
   compile
@@ -71,7 +71,7 @@ let create scope ({ clock; clear; start; finish; data_in; data_in_valid } : _ I.
         [ ( Idle
           , [ when_
                 start
-                [ counter <-- zero num_bits
+                [ counter <-- zero (2 * num_bits)
                 ; sm.set_next Accepting_inputs
                 ]
             ] )
@@ -91,7 +91,7 @@ let create scope ({ clock; clear; start; finish; data_in; data_in_valid } : _ I.
                 (* ; when_ (has_num_digits 12 data_in) [ when_ ((divided_by data_in 111111111111) |: (divided_by data_in 10101010101) |: (divided_by data_in 1001001001) |: (divided_by data_in 100010001)) [ invalid_id <-- Signal.vdd ] ] *)
                 (* ; when_ (has_num_digits 13 data_in) [ when_ ((divided_by data_in 1111111111111)) [ invalid_id <-- Signal.vdd ] ] *)
                 ]
-            ; when_ invalid_id.value [ counter <-- counter.value +:. 1]
+            ; when_ (data_in_valid &: invalid_id.value) [ counter <-- counter.value +: ((zero num_bits) @: data_in)]
             ; when_ finish [ sm.set_next Done ]
             ] )
         ; ( Done
