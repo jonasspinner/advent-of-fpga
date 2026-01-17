@@ -1,3 +1,33 @@
+# Advent of FPGA
+
+This repo contains the solution to day 2 of advent of code 2025.
+
+Product IDs can be fed sequentially as `data_in` into the circuit.
+To determine whether an ID is invalid by a cases for different number of digits in base 10 (10..=99, 100..=999, ...).
+
+When for example a number like 1001001 is multiplied by any 3 digit number n, the result has the digits of this numbers repeated three times.
+
+This can be used to check for repeated parts by checking for divisibility.
+
+* 2 digits:
+  * repeated twice = id is divisible by 11
+* 3 digits:
+  * repeated three times = id is divisible by 111
+* 4 digits:
+  * repeated twice = id is divisible by 101
+  * repeated four times = id is divisible by 1111
+* 5 digits:
+  * repeated five times = id is divisible by 11111
+* 6 digits:
+  * repeated twice = id is divisible by 1001
+  * repeated three times = id is divisible by 10101
+  * repeated six times = id is divisible by 111111
+* ...
+
+
+**The followoing is the original README**
+
+
 "Hardcaml Template Project"
 ===========================
 
