@@ -21,7 +21,11 @@ module I : sig
 end
 
 module O : sig
-  type 'a t = { range : 'a With_valid.t } [@@deriving hardcaml]
+  type 'a t =
+    { counter : 'a With_valid.t
+    ; invalid_id : 'a
+    }
+  [@@deriving hardcaml]
 end
 
 val hierarchical : Scope.t -> Signal.t I.t -> Signal.t O.t
