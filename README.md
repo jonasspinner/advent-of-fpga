@@ -2,27 +2,13 @@
 
 This repo contains the solution to day 2 of advent of code 2025.
 
-Product IDs can be fed sequentially as `data_in` into the circuit.
-To determine whether an ID is invalid by a cases for different number of digits in base 10 (10..=99, 100..=999, ...).
+An ID is invalid if consists of repeating parts. For example: 123123, 121212, or 111111.
 
-When for example a number like 1001001 is multiplied by any 3 digit number n, the result has the digits of this numbers repeated three times.
+For a known number of digits, this can be checked by the divisibility with the right numbers. For example for a six digit number, we can check the patterns (abc)^2, (ab)^3, and (a)^6 by divisiblity with 1001, 10101, and 111111 respectively.
 
-This can be used to check for repeated parts by checking for divisibility.
+## Accepting IDs as input
 
-* 2 digits:
-  * repeated twice = id is divisible by 11
-* 3 digits:
-  * repeated three times = id is divisible by 111
-* 4 digits:
-  * repeated twice = id is divisible by 101
-  * repeated four times = id is divisible by 1111
-* 5 digits:
-  * repeated five times = id is divisible by 11111
-* 6 digits:
-  * repeated twice = id is divisible by 1001
-  * repeated three times = id is divisible by 10101
-  * repeated six times = id is divisible by 111111
-* ...
+This solution is located in `src/day2.ml`.
 
 ```
     (Result (counter 4174379265))
@@ -48,6 +34,35 @@ This can be used to check for repeated parts by checking for divisibility.
     │day2$o$invalid_id           ││            ┌───┐   ┌───┐   ┌───┐           ┌───┐   ┌───┐   ┌───┐   ┌───┐   ┌───┐   ┌───┐   ┌───┐   ┌───┐   ┌───┐   ┌───┐                                     │
     │                            ││────────────┘   └───┘   └───┘   └───────────┘   └───┘   └───┘   └───┘   └───┘   └───┘   └───┘   └───┘   └───┘   └───┘   └───────────────────                  │
     └────────────────────────────┘└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+## Accepting ID ranges as inputs
+
+An improved version is located in `src/day2_range_sum.ml`. The input values are now ID ranges `start..=end`. The sum of all invalid IDs inside `start..=end` is calculated in one clock cycle and accumulated in the `sum` output signal.
+
+```
+    (Result (counter 4174379265))
+    ┌Signals─────────────────────┐┌Waves───────────────────────────────────────────────────────────────────────────────────────────────────────┐
+    │day2$i$clear                ││────┐                                                                                                       │
+    │                            ││    └───────────────────────────────────────────────────────────────────────────────────────────────────────│
+    │day2$i$clock                ││┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ │
+    │                            ││  └─┘ └─┘ └─┘ └─┘ └─┘ └─┘ └─┘ └─┘ └─┘ └─┘ └─┘ └─┘ └─┘ └─┘ └─┘ └─┘ └─┘ └─┘ └─┘ └─┘ └─┘ └─┘ └─┘ └─┘ └─┘ └─┘ └─│
+    │                            ││────────────┬───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────────────│
+    │day2$i$data_in_end          ││ 0          │22     │115    │1012   │118851.│222224 │1698528│446449 │385938.│565659 │824824.│2121212124     │
+    │                            ││────────────┴───────┴───────┴───────┴───────┴───────┴───────┴───────┴───────┴───────┴───────┴───────────────│
+    │                            ││────────────┬───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────────────│
+    │day2$i$data_in_start        ││ 0          │11     │95     │998    │118851.│222220 │1698522│446443 │385938.│565653 │824824.│2121212118     │
+    │                            ││────────────┴───────┴───────┴───────┴───────┴───────┴───────┴───────┴───────┴───────┴───────┴───────────────│
+    │day2$i$data_in_valid        ││            ┌───┐   ┌───┐   ┌───┐   ┌───┐   ┌───┐   ┌───┐   ┌───┐   ┌───┐   ┌───┐   ┌───┐   ┌───┐           │
+    │                            ││────────────┘   └───┘   └───┘   └───┘   └───┘   └───┘   └───┘   └───┘   └───┘   └───┘   └───┘   └───────────│
+    │day2$i$finish               ││                                                                                                    ┌───┐   │
+    │                            ││────────────────────────────────────────────────────────────────────────────────────────────────────┘   └───│
+    │day2$i$start                ││        ┌───┐                                                                                               │
+    │                            ││────────┘   └───────────────────────────────────────────────────────────────────────────────────────────────│
+    │                            ││────────────────┬───────┬───────┬───────┬───────┬───────────────┬───────┬───────┬───────┬───────┬───────────│
+    │day2$o$sum                  ││ 0              │33     │243    │2252   │118851.│1188736359     │118918.│122777.│122834.│205316.│4174379265 │
+    │                            ││────────────────┴───────┴───────┴───────┴───────┴───────────────┴───────┴───────┴───────┴───────┴───────────│
+    └────────────────────────────┘└────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 
